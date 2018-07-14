@@ -1,0 +1,46 @@
+{
+  "name": "fbi-task-commit",
+  "version": "1.0.0",
+  "description": "git commit and npm publish flow, formatting commit messages with commitizen.",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fbi-templates/fbi-task-commit.git"
+  },
+  "keywords": [
+    "git commit",
+    "handlebars",
+    "tasks",
+    "fbi-task",
+    "fbi"
+  ],
+  "author": "neikvon <neikvon@gmail.com> (https://github.com/neikvon)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fbi-templates/fbi-task-commit/issues"
+  },
+  "homepage": "https://github.com/fbi-templates/fbi-task-commit#readme",
+  "engines": {
+    "node": ">=7.6.0",
+    "npm": ">=3.10.0"
+  },
+  "dependencies": {
+    "@peak-stone/commitizen-promise": "^3.0.0",
+    "@peak-stone/cz-fbi": "^1.0.2",
+    "execa": "^0.10.0",
+    "get-stream": "^3.0.0",
+    "inquirer": "^6.0.0",
+    "standard-version": "^4.4.0"
+  },
+  "fbi": {
+    "template": {
+      "name": "fbi-task-commit"
+    },
+    "tasks": {
+      "commit": {
+        "alias": "c"
+      }
+    }
+  }
+}
