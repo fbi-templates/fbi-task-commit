@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@peak-stone/commitizen-promise": "^3.0.0",
-    "@peak-stone/cz-fbi": "^1.0.2",
+    "@peak-stone/cz-fbi": "^1.1.0",
     "execa": "^0.10.0",
     "get-stream": "^3.0.0",
     "inquirer": "^6.0.0",
