@@ -71,7 +71,6 @@ async function entry (options = defaults) {
 
     // publish
     await publish()
-    ctx.logger.success('Publish successfully\n')
 
     // status
     await getStatus()
