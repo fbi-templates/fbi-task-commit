@@ -70,10 +70,8 @@ async function entry (options = defaults) {
     }
 
     // publish
-    if (hadCommited) {
-      await publish()
-      ctx.logger.success('Publish successfully\n')
-    }
+    await publish()
+    ctx.logger.success('Publish successfully\n')
 
     // status
     await getStatus()
