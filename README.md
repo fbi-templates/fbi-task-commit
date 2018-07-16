@@ -15,11 +15,13 @@ git commit and npm publish flow, formatting commit messages with commitizen.
 
 ## Features
 
-- select files for `git add`
+- flow of `git add`, `git commit`, `git push`, `git tag`, `npm version major/minor/patch`, `npm publish`, and changelog generation
 - formatting commit messages with commitizen
-- bump version
-- `git push`
-- `npm publish`
+- version standard: [Semantic Versioning](https://semver.org/)
+- `git commit` and `changelog` style: [Angular commit style](https://docs.google.com/document/d/1QrDFcIiPjSLDn3EL15IJygNPiHORgU1_OOAqWjiDU5Y/edit#heading=h.7mqxm4jekyct)
+  - commit message format: `type(scope): subject`
+  - commit types: [cz-fbi](https://github.com/neikvon/cz-fbi#docs)
+  - changelog: only `new features, bug fixes, breaking changes` will show in `CHANGELOG.md`
 
 ## Usage
 
