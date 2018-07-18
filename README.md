@@ -47,4 +47,4 @@ $ fbi commit
 
 [MIT](https://opensource.org/licenses/MIT)
 
-## [Changelog](https://github.com/fbi-templates/fbi-task-commit/blob/master/CHANGELOG.md)
+## [Changelog](./CHANGELOG.md)
