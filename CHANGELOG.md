@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.1.9"></a>
+## [1.1.9](https://github.com/fbi-templates/fbi-task-commit/compare/v1.1.8...v1.1.9) (2018-08-13)
+
+
+### Bug Fixes
+
+* **windows:** fix file name processing problems ([e3c50c9](https://github.com/fbi-templates/fbi-task-commit/commit/e3c50c9))
+
+
+
 <a name="1.1.8"></a>
 ## [1.1.8](https://github.com/fbi-templates/fbi-task-commit/compare/v1.1.7...v1.1.8) (2018-07-18)
 
