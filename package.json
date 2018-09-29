@@ -1,6 +1,6 @@
 {
   "name": "fbi-task-commit",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "git commit and npm publish flow, formatting commit messages with commitizen.",
   "main": "index.js",
   "scripts": {},
