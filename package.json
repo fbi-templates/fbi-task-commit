@@ -28,9 +28,10 @@
   "dependencies": {
     "@peak-stone/commitizen-promise": "^3.0.0",
     "@peak-stone/cz-fbi": "^1.1.3",
-    "execa": "^0.10.0",
-    "get-stream": "^3.0.0",
-    "inquirer": "^6.0.0",
+    "chalk": "^2.4.1",
+    "execa": "^1.0.0",
+    "get-stream": "^4.1.0",
+    "inquirer": "^6.2.0",
     "standard-version": "^4.4.0"
   },
   "fbi": {
@@ -41,6 +42,9 @@
       "commit": {
         "alias": "c"
       }
+    },
+    "commit": {
+      "flow": "github"
     }
   }
 }

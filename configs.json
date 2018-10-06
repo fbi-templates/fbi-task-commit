@@ -1,0 +1,82 @@
+{
+  "flow": {
+    "default": {
+      "branch": {
+        "base": "master"
+      }
+    },
+    "github": {
+      "branch": {
+        "base": "master"
+      },
+      "customize": {
+        "feature": {
+          "prefix": "feature/",
+          "description": "Add new features",
+          "base": "base"
+        },
+        "hotfix": {
+          "prefix": "hotfix/",
+          "description": "Quickly patch production releases",
+          "base": "base"
+        }
+      }
+    },
+    "gitlab": {
+      "branch": {
+        "base": "master",
+        "pre-production": "pre-production",
+        "production": "production"
+      },
+      "customize": {
+        "feature": {
+          "prefix": "feature/",
+          "description": "Add new features",
+          "base": "base"
+        },
+        "hotfix": {
+          "prefix": "hotfix/",
+          "description": "Quickly patch production releases",
+          "base": "base"
+        }
+      }
+    },
+    "gitflow": {
+      "branch": {
+        "base": "develop",
+        "pre-production": "release",
+        "production": "master"
+      },
+      "customize": {
+        "feature": {
+          "prefix": "feature/",
+          "description": "Add new features",
+          "base": "base"
+        },
+        "hotfix": {
+          "prefix": "hotfix/",
+          "description": "Quickly patch production releases",
+          "base": "pre-production"
+        }
+      }
+    }
+  },
+  "branch": {
+    "dev": "master",
+    "test": "test",
+    "prod": "prod"
+  },
+  "standard-version": {
+    "infile": "CHANGELOG.md",
+    "message": "chore(release): %s",
+    "firstRelease": false,
+    "sign": false,
+    "noVerify": false,
+    "commitAll": false,
+    "silent": false,
+    "tagPrefix": "v",
+    "scripts": {},
+    "skip": {},
+    "dryRun": false
+  }
+}
