@@ -40,12 +40,11 @@ const initConfigs = async () => {
   configs['root'] = await status.rootPath()
 
   const defName = 'No Flow'
-  let flowName = configs['flow-name'] || defName
-
+  let flowName = configs['flow-name']
   if (!allFlowsNames.includes(flowName)) {
     console.log(
       chalk.yellow(
-        `\nConfigs of "${flowName}" not found, fallback to default "${defName}".`
+        `\n${utils.t('status.flowNotFound', { flowName, defName })}\n`
       )
     )
     flowName = defName
@@ -66,7 +65,7 @@ async function statusCheck () {
 async function main () {
   const messagePrefix = `${await utils.promptPrefix()}[${chalk.yellow(configs['flow-name'])}]`
 
-  const actions = Object.keys(configs.flow)
+  let actions = Object.keys(configs.flow)
 
   if (configs.actions && configs.actions.pre) {
     actions.unshift(...configs.actions.pre, new inquirer.Separator())
@@ -75,11 +74,16 @@ async function main () {
     actions.push(new inquirer.Separator(), ...configs.actions.post)
   }
 
+  actions = actions.map(a => ({
+    name: typeof a === 'string' ? utils.t(`actions.${a}`) : a,
+    value: a
+  }))
+
   const prompts = [
     {
       type: 'list',
       name: 'flowName',
-      message: `${messagePrefix} Choose a action:`,
+      message: `${messagePrefix} ${utils.t('title.chooseAction')}:`,
       choices: actions,
       pageSize: 20
     }
@@ -109,26 +113,33 @@ async function main () {
   fn && (await fn(params))
 
   if (configs.logs.DONE) {
-    console.log(chalk.green(`DONE: ${actionName.replace(/-/g, ' ')}\n`))
+    console.log(
+      chalk.green(
+        `${utils.t('title.done')}: ${utils.t(`actions.${actionName}`)}\n`
+      )
+    )
   }
 
   await main()
 }
 
 async function entry () {
-  const t = await i18n()
+  // i18n
+  const t = await i18n('en')
   utils['t'] = t
 
-  console.log(t('key'))
-
+  // git init
   if (!await status.isGitRepo()) {
     return utils.gitInit()
   }
 
+  // init configs
   await initConfigs()
 
+  // start flow
   if (configs.actions.before && flows[configs.actions.before]) {
     await flows[configs.actions.before](params)
+    console.log()
   }
 
   await main()
