@@ -1,71 +1,24 @@
 {
-  "flow": {
-    "default": {
-      "branch": {
-        "base": "master"
-      }
-    },
-    "github": {
-      "branch": {
-        "base": "master"
-      },
-      "customize": {
-        "feature": {
-          "prefix": "feature/",
-          "description": "Add new features",
-          "base": "base"
-        },
-        "hotfix": {
-          "prefix": "hotfix/",
-          "description": "Quickly patch production releases",
-          "base": "base"
-        }
-      }
-    },
-    "gitlab": {
-      "branch": {
-        "base": "master",
-        "pre-production": "pre-production",
-        "production": "production"
-      },
-      "customize": {
-        "feature": {
-          "prefix": "feature/",
-          "description": "Add new features",
-          "base": "base"
-        },
-        "hotfix": {
-          "prefix": "hotfix/",
-          "description": "Quickly patch production releases",
-          "base": "base"
-        }
-      }
-    },
-    "gitflow": {
-      "branch": {
-        "base": "develop",
-        "pre-production": "release",
-        "production": "master"
-      },
-      "customize": {
-        "feature": {
-          "prefix": "feature/",
-          "description": "Add new features",
-          "base": "base"
-        },
-        "hotfix": {
-          "prefix": "hotfix/",
-          "description": "Quickly patch production releases",
-          "base": "pre-production"
-        }
-      }
-    }
+  "flow-name": "No Flow",
+  "flows": {
+    "No Flow": "./lib/flows/no-flow.js"
   },
-  "branch": {
-    "dev": "master",
-    "test": "test",
-    "prod": "prod"
+  "actions": {
+    "pre": [
+      "status",
+      "commit"
+    ],
+    "post": [
+      "helpers",
+      "exit"
+    ],
+    "before": "status",
+    "after": ""
   },
+  "logs": {
+    "DONE": true
+  },
+  "checkConflictString": true,
   "standard-version": {
     "infile": "CHANGELOG.md",
     "message": "chore(release): %s",
