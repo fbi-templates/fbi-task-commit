@@ -30,54 +30,83 @@ function pathToFunction (obj, basePath) {
 }
 
 const initConfigs = async () => {
+  let current
+
+  // defaults
   const defConfigs = require('./configs')
-  pathToFunction(defConfigs.flows)
-  const userConfigs = ctx && ctx.options ? ctx.options.commit : {}
-  pathToFunction(userConfigs.flows || {}, process.cwd())
+  pathToFunction(defConfigs.flow.list)
 
-  configs = Object.assign({}, defConfigs, userConfigs)
-  const allFlowsNames = Object.keys(configs.flows)
-  configs['root'] = await status.rootPath()
-
-  const defName = 'No Flow'
-  let flowName = configs['flow-name']
-  if (!allFlowsNames.includes(flowName)) {
-    console.log(
-      chalk.yellow(
-        `\n${utils.t('status.flowNotFound', { flowName, defName })}\n`
-      )
-    )
-    flowName = defName
+  // user configs
+  const userConfigs = ctx && ctx.options && ctx.options.commit
+    ? ctx.options.commit
+    : {
+      flow: {}
+    }
+  userConfigs['flow'] = userConfigs['flow'] || {}
+  if (typeof userConfigs.flow === 'string') {
+    current = userConfigs.flow
+    userConfigs.flow = {
+      current
+    }
+  } else {
+    current = userConfigs.flow.current || ''
   }
-  configs.flow = configs.flows[flowName]
-  configs['flow-name'] = flowName
+
+  if (userConfigs.flow.list) {
+    pathToFunction(userConfigs.flow.list, process.cwd())
+  }
+
+  configs = ctx.utils.assign({}, defConfigs, userConfigs)
+
+  const allFlowsNames = Object.keys(configs.flow.list)
+  configs.flow['root'] = await status.rootPath()
+
+  const def = configs.flow.default
+  // let current = configs.flow['current']
+  if (!current) {
+    current = def
+  }
+  if (!allFlowsNames.includes(current)) {
+    console.log(
+      chalk.yellow(`\n${utils.t('status.flowNotFound', { current, def })}\n`)
+    )
+    current = def
+  }
+  configs.flow['current'] = current
 
   return configs
 }
 
 async function statusCheck () {
-  const next = await flows.check(params)
+  const next = await status.check(configs)
   if (next) {
     await flows[next](params)
   }
 }
 
 async function main () {
-  const messagePrefix = `${await utils.promptPrefix()}[${chalk.yellow(configs['flow-name'])}]`
+  const currentFlow = configs.flow.list[configs.flow.current]
+  const messagePrefix = `${await utils.promptPrefix()}[${chalk.yellow(configs.flow.current)}]`
 
-  let actions = Object.keys(configs.flow)
+  let actions = Object.keys(currentFlow)
 
-  if (configs.actions && configs.actions.pre) {
-    actions.unshift(...configs.actions.pre, new inquirer.Separator())
+  if (configs.flow.actions && configs.flow.actions.pre) {
+    actions.unshift(...configs.flow.actions.pre, new inquirer.Separator())
   }
-  if (configs.actions && configs.actions.post) {
-    actions.push(new inquirer.Separator(), ...configs.actions.post)
+  if (configs.flow.actions && configs.flow.actions.post) {
+    actions.push(new inquirer.Separator(), ...configs.flow.actions.post)
   }
 
-  actions = actions.map(a => ({
-    name: typeof a === 'string' ? utils.t(`actions.${a}`) : a,
-    value: a
-  }))
+  actions = actions.map(a => {
+    if (typeof a === 'string') {
+      return {
+        name: typeof a === 'string' ? utils.t(`actions.${a}`) : a,
+        value: a
+      }
+    } else {
+      return a
+    }
+  })
 
   const prompts = [
     {
@@ -88,7 +117,7 @@ async function main () {
       pageSize: 20
     }
   ]
-  if (configs.actions.post.includes('helpers')) {
+  if (configs.flow.actions.post.includes('helpers')) {
     prompts.push({
       type: 'list',
       name: 'helper',
@@ -108,16 +137,20 @@ async function main () {
   const actionName = helper ? `helpers:${helper}` : flowName
   const fn = helper
     ? flows['helpers'][helper]
-    : configs.flow[actionName] || flows[actionName]
+    : currentFlow[actionName] || flows[actionName]
 
-  fn && (await fn(params))
-
-  if (configs.logs.DONE) {
-    console.log(
-      chalk.green(
-        `${utils.t('title.done')}: ${utils.t(`actions.${actionName}`)}\n`
+  try {
+    fn && (await fn(params))
+    if (configs.flow.logs.DONE) {
+      console.log(
+        chalk.green(
+          `${utils.t('title.done')}: ${utils.t(`actions.${actionName}`)}\n`
+        )
       )
-    )
+    }
+  } catch (err) {
+    console.log(chalk.red(err))
+    console.log(err)
   }
 
   await main()
@@ -135,17 +168,19 @@ async function entry () {
 
   // init configs
   await initConfigs()
+  params.configs = configs
+  // console.log(configs)
 
   // start flow
-  if (configs.actions.before && flows[configs.actions.before]) {
-    await flows[configs.actions.before](params)
+  if (configs.flow.actions.before && flows[configs.flow.actions.before]) {
+    await flows[configs.flow.actions.before](params)
     console.log()
   }
 
   await main()
 
-  if (configs.actions.after && flows[configs.actions.after]) {
-    await flows[configs.actions.after](params)
+  if (configs.flow.actions.after && flows[configs.flow.actions.after]) {
+    await flows[configs.flow.actions.after](params)
   }
 }
 
