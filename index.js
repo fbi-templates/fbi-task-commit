@@ -30,71 +30,64 @@ function pathToFunction (obj, basePath) {
 }
 
 const initConfigs = async () => {
-  let current
-
   // defaults
   const defConfigs = require('./configs')
-  pathToFunction(defConfigs.flow.list)
+  pathToFunction(defConfigs.flows)
 
   // user configs
   const userConfigs = ctx && ctx.options && ctx.options.commit
     ? ctx.options.commit
-    : {
-      flow: {}
-    }
-  userConfigs['flow'] = userConfigs['flow'] || {}
-  if (typeof userConfigs.flow === 'string') {
-    current = userConfigs.flow
-    userConfigs.flow = {
-      current
-    }
-  } else {
-    current = userConfigs.flow.current || ''
-  }
+    : {}
 
-  if (userConfigs.flow.list) {
-    pathToFunction(userConfigs.flow.list, process.cwd())
+  if (userConfigs.flows) {
+    pathToFunction(userConfigs.flows, process.cwd())
   }
 
   configs = ctx.utils.assign({}, defConfigs, userConfigs)
 
-  const allFlowsNames = Object.keys(configs.flow.list)
-  configs.flow['root'] = await status.rootPath()
-
-  const def = configs.flow.default
-  // let current = configs.flow['current']
-  if (!current) {
-    current = def
-  }
-  if (!allFlowsNames.includes(current)) {
+  if (!Object.keys(configs.flows).includes(configs.flow)) {
     console.log(
-      chalk.yellow(`\n${utils.t('status.flowNotFound', { current, def })}\n`)
+      chalk.yellow(
+        `\n${utils.t('status.flowNotFound', {
+          current: configs.flow,
+          def: configs.default
+        })}\n`
+      )
     )
-    current = def
+    configs.flow = configs.default
   }
-  configs.flow['current'] = current
+
+  configs['root'] = await status.rootPath()
+
+  const currentFlow = configs.flows[configs.flow]
+  configs['branches'] = currentFlow.branches
+  configs['actions'] = currentFlow.actions
+  configs['branches']['protected'] = Object.keys(
+    configs['branches']['long-lived']
+  ).filter(b => configs['branches']['long-lived'][b].protected)
 
   return configs
 }
 
 async function statusCheck () {
-  const next = await status.check(configs)
+  const next = await utils.check(configs)
   if (next) {
     await flows[next](params)
   }
 }
 
 async function main () {
-  const currentFlow = configs.flow.list[configs.flow.current]
-  const messagePrefix = `${await utils.promptPrefix()}[${chalk.yellow(configs.flow.current)}]`
+  const messagePrefix = `${await utils.promptPrefix()}[${chalk.yellow(configs.flow)}]`
 
-  let actions = Object.keys(currentFlow)
+  let actions = Object.keys(configs.actions)
 
-  if (configs.flow.actions && configs.flow.actions.pre) {
-    actions.unshift(...configs.flow.actions.pre, new inquirer.Separator())
-  }
-  if (configs.flow.actions && configs.flow.actions.post) {
-    actions.push(new inquirer.Separator(), ...configs.flow.actions.post)
+  if (configs.hooks) {
+    if (configs.hooks.pre) {
+      actions.unshift(...configs.hooks.pre, new inquirer.Separator())
+    }
+    if (configs.hooks.post) {
+      actions.push(new inquirer.Separator(), ...configs.hooks.post)
+    }
   }
 
   actions = actions.map(a => {
@@ -117,7 +110,7 @@ async function main () {
       pageSize: 20
     }
   ]
-  if (configs.flow.actions.post.includes('helpers')) {
+  if (configs.hooks.post.includes('helpers')) {
     prompts.push({
       type: 'list',
       name: 'helper',
@@ -137,11 +130,11 @@ async function main () {
   const actionName = helper ? `helpers:${helper}` : flowName
   const fn = helper
     ? flows['helpers'][helper]
-    : currentFlow[actionName] || flows[actionName]
+    : configs.actions[actionName] || flows[actionName]
 
   try {
     fn && (await fn(params))
-    if (configs.flow.logs.DONE) {
+    if (configs.logs.DONE) {
       console.log(
         chalk.green(
           `${utils.t('title.done')}: ${utils.t(`actions.${actionName}`)}\n`
@@ -169,18 +162,18 @@ async function entry () {
   // init configs
   await initConfigs()
   params.configs = configs
-  // console.log(configs)
+  console.log(JSON.stringify(configs, null, 2))
 
   // start flow
-  if (configs.flow.actions.before && flows[configs.flow.actions.before]) {
-    await flows[configs.flow.actions.before](params)
+  if (configs.hooks.before && flows[configs.hooks.before]) {
+    await flows[configs.hooks.before](params)
     console.log()
   }
 
   await main()
 
-  if (configs.flow.actions.after && flows[configs.flow.actions.after]) {
-    await flows[configs.flow.actions.after](params)
+  if (configs.hooks.after && flows[configs.hooks.after]) {
+    await flows[configs.hooks.after](params)
   }
 }
 

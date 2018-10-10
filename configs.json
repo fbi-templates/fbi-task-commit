@@ -1,9 +1,12 @@
 {
-  "flow-name": "No Flow",
+  "flow": "No Flow",
+  "default": "No Flow",
+  "branches": {},
+  "actions": {},
   "flows": {
     "No Flow": "./lib/flows/no-flow.js"
   },
-  "actions": {
+  "hooks": {
     "pre": [
       "status",
       "commit"
@@ -26,7 +29,7 @@
     "sign": false,
     "noVerify": false,
     "commitAll": false,
-    "silent": false,
+    "silent": true,
     "tagPrefix": "v",
     "scripts": {},
     "skip": {},
