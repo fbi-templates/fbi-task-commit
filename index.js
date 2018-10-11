@@ -32,20 +32,20 @@ function pathToFunction (obj, basePath) {
 const initConfigs = async () => {
   // defaults
   const defConfigs = require('./configs')
-  pathToFunction(defConfigs.flows)
-
   // user configs
   const userConfigs = ctx && ctx.options && ctx.options.commit
     ? ctx.options.commit
     : {}
-
-  if (userConfigs.flows) {
-    pathToFunction(userConfigs.flows, process.cwd())
-  }
-
   configs = ctx.utils.assign({}, defConfigs, userConfigs)
 
-  if (!Object.keys(configs.flows).includes(configs.flow)) {
+  const _flows = {
+    'no-flow': require('./configs/no-flow'),
+    'git-flow': require('./configs/git-flow'),
+    'github-flow': require('./configs/github-flow'),
+    'gitlab-flow': require('./configs/gitlab-flow')
+  }
+
+  if (!Object.keys(_flows).includes(configs.flow)) {
     console.log(
       chalk.yellow(
         `\n${utils.t('status.flowNotFound', {
@@ -57,11 +57,13 @@ const initConfigs = async () => {
     configs.flow = configs.default
   }
 
+  configs = ctx.utils.assign({}, configs, _flows[configs.flow])
+
   configs['root'] = await status.rootPath()
 
-  const currentFlow = configs.flows[configs.flow]
-  configs['branches'] = currentFlow.branches
-  configs['actions'] = currentFlow.actions
+  // const currentFlow = configs.flows[configs.flow]
+  // configs['branches'] = currentFlow.branches
+  // configs['actions'] = currentFlow.actions
   configs['branches']['protected'] = Object.keys(
     configs['branches']['long-lived']
   ).filter(b => configs['branches']['long-lived'][b].protected)
@@ -70,16 +72,29 @@ const initConfigs = async () => {
 }
 
 async function statusCheck () {
-  const next = await utils.check(configs)
+  const next = await utils.checkStatus(configs)
   if (next) {
     await flows[next](params)
   }
 }
 
+async function actionHookPre () {
+  await exec('git stash -u')
+  await exec('git fetch --all --prune')
+}
+
+async function actionHookPost () {
+  if (await status.hasStashs()) {
+    await exec('git stash pop')
+  }
+}
+
 async function main () {
+  await statusCheck()
+
   const messagePrefix = `${await utils.promptPrefix()}[${chalk.yellow(configs.flow)}]`
 
-  let actions = Object.keys(configs.actions)
+  let actions = JSON.parse(JSON.stringify(configs.actions))
 
   if (configs.hooks) {
     if (configs.hooks.pre) {
@@ -110,6 +125,7 @@ async function main () {
       pageSize: 20
     }
   ]
+
   if (configs.hooks.post.includes('helpers')) {
     prompts.push({
       type: 'list',
@@ -125,21 +141,27 @@ async function main () {
       pageSize: 20
     })
   }
+
   const { flowName, helper } = await inquirer.prompt(prompts)
 
   const actionName = helper ? `helpers:${helper}` : flowName
   const fn = helper
-    ? flows['helpers'][helper]
-    : configs.actions[actionName] || flows[actionName]
+    ? flows['helpers'][helper] // : configs.actions[actionName] || flows[actionName]
+    : flows[actionName]
 
   try {
-    fn && (await fn(params))
-    if (configs.logs.DONE) {
-      console.log(
-        chalk.green(
-          `${utils.t('title.done')}: ${utils.t(`actions.${actionName}`)}\n`
+    if (fn) {
+      await actionHookPre()
+      await fn(params)
+      await actionHookPost()
+
+      if (configs.logs.DONE) {
+        console.log(
+          chalk.green(
+            `${utils.t('title.done')}: ${utils.t(`actions.${actionName}`)}\n`
+          )
         )
-      )
+      }
     }
   } catch (err) {
     console.log(chalk.red(err))
@@ -162,18 +184,31 @@ async function entry () {
   // init configs
   await initConfigs()
   params.configs = configs
-  console.log(JSON.stringify(configs, null, 2))
+  // return console.log(JSON.stringify(configs, null, 2))
 
   // start flow
-  if (configs.hooks.before && flows[configs.hooks.before]) {
-    await flows[configs.hooks.before](params)
+  if (configs.hooks.before) {
+    for (let action of configs.hooks.before) {
+      if (flows[action]) {
+        try {
+          await flows[action](params)
+        } catch (err) {
+          throw err
+        }
+      }
+    }
     console.log()
   }
 
   await main()
 
-  if (configs.hooks.after && flows[configs.hooks.after]) {
-    await flows[configs.hooks.after](params)
+  if (configs.hooks.after) {
+    for (let action of configs.hooks.after) {
+      if (flows[action]) {
+        await flows[action](params)
+      }
+    }
+    console.log()
   }
 }
 

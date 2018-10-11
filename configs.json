@@ -1,22 +1,20 @@
 {
-  "flow": "No Flow",
-  "default": "No Flow",
+  "flow": "no-flow",
+  "default": "no-flow",
   "branches": {},
-  "actions": {},
-  "flows": {
-    "No Flow": "./lib/flows/no-flow.js"
-  },
+  "actions": [],
   "hooks": {
     "pre": [
       "status",
       "commit"
     ],
     "post": [
+      "switch-branch",
       "helpers",
       "exit"
     ],
-    "before": "status",
-    "after": ""
+    "before": ["check", "status"],
+    "after": [""]
   },
   "logs": {
     "DONE": true
