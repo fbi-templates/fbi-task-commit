@@ -9,8 +9,9 @@
       "commit"
     ],
     "post": [
-      "switch-branch",
+      "switch branch",
       "helpers",
+      "setup",
       "exit"
     ],
     "before": ["check", "status"],

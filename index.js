@@ -63,7 +63,6 @@ module.exports = async () => {
         }
       }
     }
-    log()
   }
 
   await action.entry(params)
@@ -74,6 +73,5 @@ module.exports = async () => {
         await action.actions[_a](params)
       }
     }
-    log()
   }
 }
