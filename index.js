@@ -15,8 +15,8 @@ let configs
 
 async function statusCheck () {
   const next = await helper.checkStatus(configs)
-  if (next) {
-    await flows[next](params)
+  if (next && action.actions[next]) {
+    await action.actions[next](params)
   }
 }
 
@@ -48,9 +48,9 @@ module.exports = async () => {
     helper,
     git,
     assign,
-    style
+    style,
+    log
   })
-  log(configs)
 
   // start flow
   if (configs.hooks.before) {
