@@ -16,6 +16,14 @@ module.exports = {
         rebase: 'master'
       }
     },
+    release: {
+      production: {
+        on: 'production',
+        mergeFrom: 'pre-production',
+        delete: false,
+        tag: true
+      }
+    },
     infix: '/'
   },
   actions: ['new branch', 'sync branch', 'release']

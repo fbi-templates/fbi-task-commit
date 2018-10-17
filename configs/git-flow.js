@@ -44,9 +44,9 @@ module.exports = {
   actions: [
     'new branch',
     'sync branch',
-    'release-pre-production',
-    'finish-release-pre-production',
-    'release-production',
-    'finish-release-production'
+    'release pre-production',
+    'finish release pre-production',
+    'release production',
+    'finish release production'
   ]
 }
