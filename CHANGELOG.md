@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.2.2"></a>
+## [1.2.2](https://github.com/fbi-templates/fbi-task-commit/compare/v1.2.1...v1.2.2) (2020-05-25)
+
+
+### Bug Fixes
+
+* **publish:** don't go publish flow  when private in package.json is true ([afb9797](https://github.com/fbi-templates/fbi-task-commit/commit/afb9797))
+
+
+
 <a name="1.2.1"></a>
 ## [1.2.1](https://github.com/fbi-templates/fbi-task-commit/compare/v1.2.0...v1.2.1) (2018-09-29)
 
