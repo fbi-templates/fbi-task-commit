@@ -9,6 +9,7 @@ const {
   push,
   gitInit
 } = require('./lib/git')
+const { pkgExist, readPkg } = require('./lib/pkg')
 
 process.on('unhandledRejection', (reason, promise) => {
   ctx.logger.error(
@@ -33,7 +34,7 @@ async function entry (options = defaults) {
   // prevent additional parameters results in an git git error
   process.argv = process.argv.slice(0, 3)
 
-  if (!await isGitRepo(options.repoPath)) {
+  if (!(await isGitRepo(options.repoPath))) {
     await gitInit()
   }
 
@@ -70,7 +71,12 @@ async function entry (options = defaults) {
     }
 
     // publish
-    await publish()
+    if (await pkgExist()) {
+      const pkg = readPkg()
+      if (!pkg.private) {
+        await publish(pkg)
+      }
+    }
 
     // status
     await getStatus()
